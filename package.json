@@ -1,0 +1,22 @@
+{
+  "name": "simple-hosts",
+  "version": "1.0.0",
+  "description": "Simple functions to manipulate hosts contents",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Tested locally\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maixuanhan/simple-hosts.git"
+  },
+  "keywords": [
+    "hosts"
+  ],
+  "author": "Han Mai",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/maixuanhan/simple-hosts/issues"
+  },
+  "homepage": "https://github.com/maixuanhan/simple-hosts#readme"
+}

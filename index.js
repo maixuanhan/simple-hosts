@@ -1,8 +1,7 @@
 const fs = require('fs')
-const net = require('net')
 
-// const HOSTS_FILE_PATH = process.platform === 'win32' ? 'C:/Windows/System32/drivers/etc/hosts' : '/etc/hosts'
-const HOSTS_FILE_PATH = './hosts'
+const HOSTS_FILE_PATH = process.platform === 'win32' ? 'C:/Windows/System32/drivers/etc/hosts' : '/etc/hosts'
+// const HOSTS_FILE_PATH = './hosts'
 const ENDLINE = process.platform === 'win32' ? '\r\n' : '\n'
 
 function read(path) {
@@ -30,7 +29,7 @@ function getIp(hostname) {
     read(HOSTS_FILE_PATH).split(/\r?\n/).some(line => {
         let tokens = lineToTokens(line)
         let found = tokens.some((token, index) => {
-            if (index > 0 && token == hostname) {
+            if (index > 0 && token === hostname) {
                 return true
             }
         })
