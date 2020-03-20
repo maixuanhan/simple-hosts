@@ -12,6 +12,10 @@ function write(path, content) {
     return fs.writeFileSync(path, content, { encoding: 'utf8' })
 }
 
+function append(path, content) {
+    return fs.appendFileSync(path, content, { encoding: 'utf8' })
+}
+
 /** Normalize and turn line into token strings
  * @param {string} line a line in hosts file
  * @returns {[string]}
@@ -64,34 +68,11 @@ function getHosts(ip) {
  * @param {string} hostname
  */
 function set(ip, hostname) {
-    let foundLine = ''
-    let lines = read(HOSTS_FILE_PATH).split(/\r?\n/)
-    let found = lines.some((line, index) => {
-        let tokens = lineToTokens(line)
-        if (tokens.length > 0 && tokens[0] === ip) {
-            foundLine = line
-            lines.splice(index, 1)
-            return true
-        }
-    })
-
-    let tokens = []
-    if (found) {
-        tokens = lineToTokens(foundLine)
-        for (let i = 1; i < tokens.length; ++i) {
-            if (tokens[i] === hostname) {
-                return // already in the hosts file
-            }
-        }
+    if (!getHosts(ip).some(host => {
+        return host === hostname
+    })) {
+        append(HOSTS_FILE_PATH, `${ENDLINE}${ip}\t${hostname}`)
     }
-    else {
-        tokens.push(ip)
-    }
-
-    tokens.push(hostname)
-    let newLine = tokens.join('\t')
-    lines.push(newLine)
-    write(HOSTS_FILE_PATH, lines.join(ENDLINE))
 }
 
 module.exports = { getIp, getHosts, set }

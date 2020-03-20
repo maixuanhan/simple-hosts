@@ -10,6 +10,10 @@ Why this?
 - transparent source code
 - free of use
 
+What's news?
+- 1.1.0
+    - Improve `set()` function to support new separate entry
+
 This package provides the below synchronous functions
 ```ts
 getIp(hostname: string): string
