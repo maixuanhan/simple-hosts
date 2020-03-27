@@ -68,10 +68,39 @@ function getHosts(ip) {
  * @param {string} hostname
  */
 function set(ip, hostname) {
-    if (!getHosts(ip).some(host => {
-        return host === hostname
-    })) {
-        append(HOSTS_FILE_PATH, `${ENDLINE}${ip}\t${hostname}`)
+    let existedIp = getIp(hostname)
+    if (existedIp !== ip) {
+        let lines = read(HOSTS_FILE_PATH).split(/\r?\n/)
+        let modifiedIndex = -1
+        let newContent = ''
+        let deletedIndex = -1
+        lines.some((line, index) => {
+            let tokens = lineToTokens(line)
+            if (tokens.length == 2 && tokens[1] === hostname) {
+                deletedIndex = index
+                return true
+            }
+            else if (tokens.length > 2) {
+                for (let i = 1; i < tokens.length; ++i) {
+                    if (tokens[i] === hostname) {
+                        modifiedIndex = index
+                        tokens.splice(i, 1)
+                        newContent = tokens.join('\t')
+                        return true
+                    }
+                }
+            }
+            return false
+        })
+
+        if (deletedIndex >= 0)
+            lines.splice(deletedIndex, 1);
+        else if (modifiedIndex >= 0)
+            lines[modifiedIndex] = newContent
+
+        lines.push(`${ip}\t${hostname}`)
+
+        write(HOSTS_FILE_PATH, lines.join(ENDLINE))
     }
 }
 
