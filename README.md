@@ -13,6 +13,8 @@ Why this?
 What's news?
 - 1.1.0
     - Improve `set()` function to support new separate entry
+- 1.2.0
+    - Fix the `set()` function to support modifying existed hostname
 
 This package provides the below synchronous functions
 ```ts
