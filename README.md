@@ -4,7 +4,9 @@ Easy way to manipulate the hosts file contents.
 
 Why this?
 - simple, lightweight
-- synchronous => less error prone, don't need to chain with Promise
+- synchronous => 
+    - less error prone over other library since they open the small file for very long time which may cause file corruption
+    - ease of use, don't need to chain with Promise
 - support multiple hostname associated with a single IP address
 - well tested before release
 - transparent source code
@@ -15,12 +17,30 @@ What's news?
     - Improve `set()` function to support new separate entry
 - 1.2.0
     - Fix the `set()` function to support modifying existed hostname
+- 1.2.1
+    - Refactor the source code. Create `SimpleHosts` class supporting input hosts file path
+    - Add test cases
+    - Update document
+
 
 This package provides the below synchronous functions
-```ts
-getIp(hostname: string): string
-getHosts(ip: string): [string]
-set(ip: string, hostname: string): void
-```
+
+1. Get corresponding IP of a hostname
+    ```ts
+    getIp(hostname: string): string
+    ```
+    Returns the corresponding IP that is mapped to the input hostname. If no record is found, it will return an empty string. If there are multiple IPs that are mapped to a same hostname, the first IP will be returned. Multiple IPs for a same hostname is not encouraged because it causes ambiguous
+
+2. Get corresponding hostnames of an IP
+    ```ts
+    getHosts(ip: string): [string]
+    ```
+    Returns an array of found hostnames that are mapped to the input IP
+
+3. Create or modify a record in hosts file
+    ```ts
+    set(ip: string, hostname: string): void
+    ```
+    If the same record that contains same IP and same hostname has been in the hosts file, no additional writing is performed. If the hostname has been already existed, it will be removed from the map of current IP and then new record will be added.
 
 *To be supported (if there is user requests in the future): remove IP address and/or hostname(s)*

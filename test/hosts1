@@ -2,7 +2,7 @@
 # %WINDIR%\System32\drivers\etc\hosts. Modifications to this file will be overwritten.
 
 127.0.0.1	localhost
-127.0.1.1	DESKTOP-26L9MT1.localdomain	DESKTOP-26L9MT1
+127.0.1.1	DESKTOP-26L9MT1.localdomain	DESKTOP-26L9MT1 DESKTOP-26L9MT2
 127.0.1.1	hanmai	somehostname
 
 
