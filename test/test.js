@@ -1,5 +1,5 @@
 const should = require('chai').should()
-const SimpleHosts = require('../SimpleHosts')
+const SimpleHosts = require('../build/SimpleHosts').SimpleHosts
 const fs = require('fs')
 
 describe('Test getIp() function', function () {

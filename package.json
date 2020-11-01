@@ -2,9 +2,11 @@
   "name": "simple-hosts",
   "version": "1.2.1",
   "description": "Simple functions to manipulate hosts contents",
-  "main": "index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "scripts": {
-    "test": "cd test && mocha"
+    "test": "cd test && mocha",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -20,7 +22,9 @@
   },
   "homepage": "https://github.com/maixuanhan/simple-hosts#readme",
   "devDependencies": {
+    "@types/node": "^14.14.6",
     "chai": "^4.2.0",
-    "mocha": "^7.1.1"
+    "mocha": "^7.1.1",
+    "typescript": "^4.0.5"
   }
 }
