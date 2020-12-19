@@ -89,3 +89,42 @@ describe("Test set() function", function () {
         verifier.getHosts('127.0.0.2').should.have.length(2)
     })
 })
+
+describe("Test delete() function", function () {
+    const filename = 'hosts2'
+    before(function () {
+        if (fs.existsSync(filename)) {
+            fs.unlinkSync(filename)
+        }
+        fs.writeFileSync(filename, 'han')
+    })
+    after(function () {
+        if (fs.existsSync(filename)) {
+            fs.unlinkSync(filename)
+        }
+    })
+    const h2 = new SimpleHosts(filename)
+    const verifier = new SimpleHosts(filename)
+    it(`delete('my-host') after set('127.0.0.2', 'my-host')`, function () {
+        h2.set('127.0.0.2', 'my-host')
+        h2.delete('my-host')
+        verifier.getHosts('127.0.0.2').should.eql([])
+        verifier.getIp('my-host').should.equals('')
+    })
+    it(`delete should remove only one host`, function () {
+        h2.set('127.0.0.3', 'my-host31')
+        h2.set('127.0.0.3', 'my-host32')
+        h2.set('127.0.0.3', 'my-host33')
+        verifier.getHosts('127.0.0.3').should.have.length(3)
+        h2.delete('my-host32')
+        verifier.getHosts('127.0.0.3').should.have.length(2)
+    })
+    it(`delete should do nothing if host was not found`, function () {
+        h2.set('127.0.0.3', 'my-host31')
+        h2.set('127.0.0.3', 'my-host32')
+        h2.set('127.0.0.3', 'my-host33')
+        verifier.getHosts('127.0.0.3').should.have.length(3)
+        h2.delete('my-host')
+        verifier.getHosts('127.0.0.3').should.have.length(3)
+    })
+})

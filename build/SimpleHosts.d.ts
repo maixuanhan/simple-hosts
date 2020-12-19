@@ -17,4 +17,8 @@ export declare class SimpleHosts {
      * @param {string} hostname
      */
     set(ip: string, hostname: string): void;
+    /** Remove a record in hosts file
+     * @param {string} hostname
+     */
+    delete(hostname: string): void;
 }
