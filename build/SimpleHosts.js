@@ -91,6 +91,26 @@ var SimpleHosts = /** @class */ (function () {
             write(this.hostsFilePath, lines.join(ENDLINE));
         }
     };
+    /** Remove a record in hosts file
+     * @param {string} hostname
+     */
+    SimpleHosts.prototype.delete = function (hostname) {
+        if (this.getIp(hostname) !== '') {
+            var lines = read(this.hostsFilePath).split(/\r?\n/);
+            var deletedIndex_2 = -1;
+            lines.some(function (line, index) {
+                var tokens = lineToTokens(line);
+                if (tokens.length == 2 && tokens[1] === hostname) {
+                    deletedIndex_2 = index;
+                    return true;
+                }
+                return false;
+            });
+            if (deletedIndex_2 >= 0)
+                lines.splice(deletedIndex_2, 1);
+            write(this.hostsFilePath, lines.join(ENDLINE));
+        }
+    };
     return SimpleHosts;
 }());
 exports.SimpleHosts = SimpleHosts;

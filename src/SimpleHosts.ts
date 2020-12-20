@@ -101,4 +101,27 @@ export class SimpleHosts {
             write(this.hostsFilePath, lines.join(ENDLINE));
         }
     }
+
+    /** Remove a record in hosts file
+     * @param {string} hostname
+     */
+    delete(hostname: string) {
+        if (this.getIp(hostname) !== '') {
+            let lines = read(this.hostsFilePath).split(/\r?\n/);
+            let deletedIndex = -1;
+            lines.some((line, index) => {
+                let tokens = lineToTokens(line);
+                if (tokens.length == 2 && tokens[1] === hostname) {
+                    deletedIndex = index;
+                    return true;
+                }
+                return false;
+            });
+
+            if (deletedIndex >= 0)
+                lines.splice(deletedIndex, 1);
+
+            write(this.hostsFilePath, lines.join(ENDLINE));
+        }
+    }
 }
