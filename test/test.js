@@ -1,6 +1,7 @@
 const should = require('chai').should()
 const SimpleHosts = require('../build/SimpleHosts').SimpleHosts
 const fs = require('fs')
+const END_LINE = require('../build/SimpleHosts').END_LINE
 
 describe('Test getIp() function', function () {
     const h1 = new SimpleHosts('hosts1')
@@ -58,7 +59,7 @@ describe("Test set() function", function () {
         if (fs.existsSync(filename)) {
             fs.unlinkSync(filename)
         }
-        fs.writeFileSync(filename, 'han')
+        fs.writeFileSync(filename, '# Test hosts file')
     })
     after(function () {
         if (fs.existsSync(filename)) {
@@ -90,13 +91,93 @@ describe("Test set() function", function () {
     })
 })
 
+describe("Test removeIp() function", function () {
+    const filename = 'hosts2'
+    before(function () {
+        if (fs.existsSync(filename)) {
+            fs.unlinkSync(filename)
+        }
+        fs.writeFileSync(filename, '# Test hosts file' + END_LINE)
+        fs.appendFileSync(filename, '127.0.0.3 my-host-1 my-host-2 my-host-3' + END_LINE)
+    })
+    after(function () {
+        if (fs.existsSync(filename)) {
+            fs.unlinkSync(filename)
+        }
+    })
+    const h2 = new SimpleHosts(filename)
+    const verifier = new SimpleHosts(filename)
+    it(`removeIp('127.0.0.1') should remove all records having IP 127.0.0.1 in ${filename} file`, function () {
+        h2.set("127.0.0.1", "host1")
+        h2.set("127.0.0.1", "host2")
+        h2.set("127.0.0.2", "host3")
+        verifier.getHosts('127.0.0.1').should.contain('host1')
+        verifier.getHosts('127.0.0.1').should.contain('host2')
+        verifier.getHosts('127.0.0.2').should.contain('host3')
+        verifier.getHosts('127.0.0.3').should.contain('my-host-1')
+        verifier.getHosts('127.0.0.3').should.contain('my-host-2')
+        verifier.getHosts('127.0.0.3').should.contain('my-host-3')
+
+        h2.removeIp("127.0.0.2")
+        verifier.getHosts('127.0.0.2').should.not.contain('host3')
+        h2.removeIp("127.0.0.1")
+        verifier.getHosts('127.0.0.1').should.not.contain('host1')
+        verifier.getHosts('127.0.0.1').should.not.contain('host2')
+        h2.removeIp("127.0.0.3")
+        verifier.getHosts('127.0.0.3').should.not.contain('my-host-1')
+        verifier.getHosts('127.0.0.3').should.not.contain('my-host-2')
+        verifier.getHosts('127.0.0.3').should.not.contain('my-host-3')
+    })
+})
+
+describe("Test removeHost() function", function () {
+    const filename = 'hosts2'
+    before(function () {
+        if (fs.existsSync(filename)) {
+            fs.unlinkSync(filename)
+        }
+        fs.writeFileSync(filename, '# Test hosts file' + END_LINE)
+        fs.appendFileSync(filename, '127.0.0.3 my-host-1 my-host-2 my-host-3' + END_LINE)
+    })
+    after(function () {
+        if (fs.existsSync(filename)) {
+            fs.unlinkSync(filename)
+        }
+    })
+    const h2 = new SimpleHosts(filename)
+    const verifier = new SimpleHosts(filename)
+    it(`removeHost('my-host-1') should remove all records having my-host-1 in ${filename} file`, function () {
+        h2.set("127.0.0.1", "host1")
+        h2.set("127.0.0.1", "host2")
+        h2.set("127.0.0.2", "host3")
+        verifier.getHosts('127.0.0.1').should.contain('host1')
+        verifier.getHosts('127.0.0.1').should.contain('host2')
+        verifier.getHosts('127.0.0.2').should.contain('host3')
+        verifier.getHosts('127.0.0.3').should.contain('my-host-1')
+        verifier.getHosts('127.0.0.3').should.contain('my-host-2')
+        verifier.getHosts('127.0.0.3').should.contain('my-host-3')
+
+        h2.removeHost("my-host-1")
+        verifier.getHosts('127.0.0.3').should.not.contain('my-host-1')
+        verifier.getHosts('127.0.0.3').should.contain('my-host-2')
+        verifier.getHosts('127.0.0.3').should.contain('my-host-3')
+
+        h2.removeHost("host1")
+        verifier.getHosts('127.0.0.1').should.not.contain('host1')
+        verifier.getHosts('127.0.0.1').should.contain('host2')
+
+        h2.removeHost("host3")
+        verifier.getHosts('127.0.0.2').should.not.contain('host3')
+    })
+})
+
 describe("Test delete() function", function () {
     const filename = 'hosts2'
     before(function () {
         if (fs.existsSync(filename)) {
             fs.unlinkSync(filename)
         }
-        fs.writeFileSync(filename, 'han')
+        fs.writeFileSync(filename, '# Test hosts file')
     })
     after(function () {
         if (fs.existsSync(filename)) {

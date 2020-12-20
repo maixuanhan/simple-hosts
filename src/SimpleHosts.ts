@@ -1,10 +1,16 @@
 import * as fs from 'fs';
 
-const HOSTS_FILE_PATH = process.platform === 'win32' ? 'C:/Windows/System32/drivers/etc/hosts' : '/etc/hosts';
-const ENDLINE = process.platform === 'win32' ? '\r\n' : '\n';
+export const DEFAULT_HOSTS_FILE_PATH =
+    process.platform === 'win32' ? 'C:/Windows/System32/drivers/etc/hosts' : '/etc/hosts';
 
-function read(path: string) {
-    return fs.readFileSync(path, { encoding: 'utf8' });
+export const END_LINE = process.platform === 'win32' ? '\r\n' : '\n';
+
+function read(path: string): string {
+    try {
+        return fs.readFileSync(path, { encoding: 'utf8' });
+    } catch (ex) {
+        return "";
+    }
 }
 
 function write(path: string, content: string) {
@@ -27,7 +33,7 @@ export class SimpleHosts {
     private hostsFilePath: string;
 
     /** @param {string} path The hosts file path */
-    constructor(path: string = HOSTS_FILE_PATH) {
+    constructor(path: string = DEFAULT_HOSTS_FILE_PATH) {
         this.hostsFilePath = path;
     }
 
@@ -35,9 +41,9 @@ export class SimpleHosts {
      * @param {string} hostname
      * @returns {string} IP address or empty string if not found
      */
-    getIp(hostname: string) {
+    getIp(hostname: string): string {
         let ip = '';
-        read(this.hostsFilePath).split(/\r?\n/).some(line => {
+        this.readLines().some(line => {
             let tokens = lineToTokens(line);
             if (tokens.some((token, index) => { return index > 0 && token === hostname })) {
                 ip = tokens[0];
@@ -51,9 +57,9 @@ export class SimpleHosts {
      * @param {string} ip
      * @returns {[string]} List of hostnames
      */
-    getHosts(ip: string) {
+    getHosts(ip: string): string[] {
         let hosts: string[] = [];
-        read(this.hostsFilePath).split(/\r?\n/).forEach(line => {
+        this.readLines().forEach(line => {
             let tokens = lineToTokens(line);
             if (tokens.length > 1 && tokens[0] === ip) {
                 hosts.push(...tokens.slice(1));
@@ -68,7 +74,7 @@ export class SimpleHosts {
      */
     set(ip: string, hostname: string) {
         if (this.getIp(hostname) !== ip) {
-            let lines = read(this.hostsFilePath).split(/\r?\n/);
+            let lines = this.readLines();
             let modifiedIndex = -1;
             let newContent = '';
             let deletedIndex = -1;
@@ -98,30 +104,61 @@ export class SimpleHosts {
 
             lines.push(`${ip}\t${hostname}`);
 
-            write(this.hostsFilePath, lines.join(ENDLINE));
+            write(this.hostsFilePath, lines.join(END_LINE));
         }
+    }
+
+    /** Remove records by IP address
+     * @param {string} ip
+     */
+    removeIp(ip: string) {
+        const lines = this.readLines();
+        const newLines: string[] = [];
+        lines.forEach(line => {
+            let tokens = lineToTokens(line);
+            if (!tokens.length || tokens[0] !== ip) {
+                newLines.push(line);
+            }
+        });
+
+        if (newLines.length !== lines.length) {
+            write(this.hostsFilePath, newLines.join(END_LINE));
+        }
+    }
+
+    /** Remove records by hostname
+     * @param {string} hostname
+     */
+    removeHost(hostname: string) {
+        let lines = this.readLines();
+        for (let i = lines.length - 1; i >= 0; --i) {
+            const line = lines[i];
+            let tokens = lineToTokens(line);
+            let changed = false;
+            for (let j = tokens.length - 1; j > 0; --j) {
+                if (tokens[j] === hostname) {
+                    tokens.splice(j, 1);
+                    changed = true;
+                }
+            }
+            if (tokens.length < 2) {
+                lines.splice(i, 1);
+            } else if (changed) {
+                lines[i] = tokens.join('\t');
+            }
+        }
+
+        write(this.hostsFilePath, lines.join(END_LINE));
     }
 
     /** Remove a record in hosts file
      * @param {string} hostname
      */
     delete(hostname: string) {
-        if (this.getIp(hostname) !== '') {
-            let lines = read(this.hostsFilePath).split(/\r?\n/);
-            let deletedIndex = -1;
-            lines.some((line, index) => {
-                let tokens = lineToTokens(line);
-                if (tokens.length == 2 && tokens[1] === hostname) {
-                    deletedIndex = index;
-                    return true;
-                }
-                return false;
-            });
+        return this.removeHost(hostname);
+    }
 
-            if (deletedIndex >= 0)
-                lines.splice(deletedIndex, 1);
-
-            write(this.hostsFilePath, lines.join(ENDLINE));
-        }
+    private readLines(): string[] {
+        return read(this.hostsFilePath).split(/\r?\n/);
     }
 }

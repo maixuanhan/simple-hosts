@@ -21,6 +21,10 @@ What's news?
     - Refactor the source code. Create `SimpleHosts` class supporting input hosts file path
     - Add test cases
     - Update document
+- 1.2.2
+    - Use typescript
+- 1.2.3
+    - Support remove records by IP or hostname with `removeIp()` and `removeHost()` function
 
 
 This package provides the below synchronous functions
@@ -31,16 +35,24 @@ This package provides the below synchronous functions
     ```
     Returns the corresponding IP that is mapped to the input hostname. If no record is found, it will return an empty string. If there are multiple IPs that are mapped to a same hostname, the first IP will be returned. Multiple IPs for a same hostname is not encouraged because it causes ambiguous
 
-2. Get corresponding hostnames of an IP
+1. Get corresponding hostnames of an IP
     ```ts
-    getHosts(ip: string): [string]
+    getHosts(ip: string): string[]
     ```
     Returns an array of found hostnames that are mapped to the input IP
 
-3. Create or modify a record in hosts file
+1. Create or modify a record in hosts file
     ```ts
     set(ip: string, hostname: string): void
     ```
     If the same record that contains same IP and same hostname has been in the hosts file, no additional writing is performed. If the hostname has been already existed, it will be removed from the map of current IP and then new record will be added.
 
-*To be supported (if there is user requests in the future): remove IP address and/or hostname(s)*
+1. Remove records by ID address
+    ```ts
+    removeIp(ip: string): void
+    ```
+
+1. Remove records by hostname
+    ```ts
+    removeHost(hostname: string): void
+    ```

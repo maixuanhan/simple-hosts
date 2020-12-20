@@ -1,11 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SimpleHosts = void 0;
+exports.SimpleHosts = exports.END_LINE = exports.DEFAULT_HOSTS_FILE_PATH = void 0;
 var fs = require("fs");
-var HOSTS_FILE_PATH = process.platform === 'win32' ? 'C:/Windows/System32/drivers/etc/hosts' : '/etc/hosts';
-var ENDLINE = process.platform === 'win32' ? '\r\n' : '\n';
+exports.DEFAULT_HOSTS_FILE_PATH = process.platform === 'win32' ? 'C:/Windows/System32/drivers/etc/hosts' : '/etc/hosts';
+exports.END_LINE = process.platform === 'win32' ? '\r\n' : '\n';
 function read(path) {
-    return fs.readFileSync(path, { encoding: 'utf8' });
+    try {
+        return fs.readFileSync(path, { encoding: 'utf8' });
+    }
+    catch (ex) {
+        return "";
+    }
 }
 function write(path, content) {
     return fs.writeFileSync(path, content, { encoding: 'utf8' });
@@ -23,7 +28,7 @@ function lineToTokens(line) {
 var SimpleHosts = /** @class */ (function () {
     /** @param {string} path The hosts file path */
     function SimpleHosts(path) {
-        if (path === void 0) { path = HOSTS_FILE_PATH; }
+        if (path === void 0) { path = exports.DEFAULT_HOSTS_FILE_PATH; }
         this.hostsFilePath = path;
     }
     /** Get the IP address by an input hostname
@@ -32,7 +37,7 @@ var SimpleHosts = /** @class */ (function () {
      */
     SimpleHosts.prototype.getIp = function (hostname) {
         var ip = '';
-        read(this.hostsFilePath).split(/\r?\n/).some(function (line) {
+        this.readLines().some(function (line) {
             var tokens = lineToTokens(line);
             if (tokens.some(function (token, index) { return index > 0 && token === hostname; })) {
                 ip = tokens[0];
@@ -47,7 +52,7 @@ var SimpleHosts = /** @class */ (function () {
      */
     SimpleHosts.prototype.getHosts = function (ip) {
         var hosts = [];
-        read(this.hostsFilePath).split(/\r?\n/).forEach(function (line) {
+        this.readLines().forEach(function (line) {
             var tokens = lineToTokens(line);
             if (tokens.length > 1 && tokens[0] === ip) {
                 hosts.push.apply(hosts, tokens.slice(1));
@@ -61,7 +66,7 @@ var SimpleHosts = /** @class */ (function () {
      */
     SimpleHosts.prototype.set = function (ip, hostname) {
         if (this.getIp(hostname) !== ip) {
-            var lines = read(this.hostsFilePath).split(/\r?\n/);
+            var lines = this.readLines();
             var modifiedIndex_1 = -1;
             var newContent_1 = '';
             var deletedIndex_1 = -1;
@@ -88,28 +93,57 @@ var SimpleHosts = /** @class */ (function () {
             else if (modifiedIndex_1 >= 0)
                 lines[modifiedIndex_1] = newContent_1;
             lines.push(ip + "\t" + hostname);
-            write(this.hostsFilePath, lines.join(ENDLINE));
+            write(this.hostsFilePath, lines.join(exports.END_LINE));
         }
+    };
+    /** Remove records by IP address
+     * @param {string} ip
+     */
+    SimpleHosts.prototype.removeIp = function (ip) {
+        var lines = this.readLines();
+        var newLines = [];
+        lines.forEach(function (line) {
+            var tokens = lineToTokens(line);
+            if (!tokens.length || tokens[0] !== ip) {
+                newLines.push(line);
+            }
+        });
+        if (newLines.length !== lines.length) {
+            write(this.hostsFilePath, newLines.join(exports.END_LINE));
+        }
+    };
+    /** Remove records by hostname
+     * @param {string} hostname
+     */
+    SimpleHosts.prototype.removeHost = function (hostname) {
+        var lines = this.readLines();
+        for (var i = lines.length - 1; i >= 0; --i) {
+            var line = lines[i];
+            var tokens = lineToTokens(line);
+            var changed = false;
+            for (var j = tokens.length - 1; j > 0; --j) {
+                if (tokens[j] === hostname) {
+                    tokens.splice(j, 1);
+                    changed = true;
+                }
+            }
+            if (tokens.length < 2) {
+                lines.splice(i, 1);
+            }
+            else if (changed) {
+                lines[i] = tokens.join('\t');
+            }
+        }
+        write(this.hostsFilePath, lines.join(exports.END_LINE));
     };
     /** Remove a record in hosts file
      * @param {string} hostname
      */
     SimpleHosts.prototype.delete = function (hostname) {
-        if (this.getIp(hostname) !== '') {
-            var lines = read(this.hostsFilePath).split(/\r?\n/);
-            var deletedIndex_2 = -1;
-            lines.some(function (line, index) {
-                var tokens = lineToTokens(line);
-                if (tokens.length == 2 && tokens[1] === hostname) {
-                    deletedIndex_2 = index;
-                    return true;
-                }
-                return false;
-            });
-            if (deletedIndex_2 >= 0)
-                lines.splice(deletedIndex_2, 1);
-            write(this.hostsFilePath, lines.join(ENDLINE));
-        }
+        return this.removeHost(hostname);
+    };
+    SimpleHosts.prototype.readLines = function () {
+        return read(this.hostsFilePath).split(/\r?\n/);
     };
     return SimpleHosts;
 }());

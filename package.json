@@ -1,7 +1,7 @@
 {
   "name": "simple-hosts",
-  "version": "1.2.2",
-  "description": "Simple functions to manipulate hosts contents",
+  "version": "1.2.3",
+  "description": "Simple functions to manipulate hosts file contents",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {

@@ -1,3 +1,5 @@
+export declare const DEFAULT_HOSTS_FILE_PATH: string;
+export declare const END_LINE: string;
 export declare class SimpleHosts {
     private hostsFilePath;
     /** @param {string} path The hosts file path */
@@ -17,8 +19,17 @@ export declare class SimpleHosts {
      * @param {string} hostname
      */
     set(ip: string, hostname: string): void;
+    /** Remove records by IP address
+     * @param {string} ip
+     */
+    removeIp(ip: string): void;
+    /** Remove records by hostname
+     * @param {string} hostname
+     */
+    removeHost(hostname: string): void;
     /** Remove a record in hosts file
      * @param {string} hostname
      */
     delete(hostname: string): void;
+    private readLines;
 }
