@@ -141,7 +141,7 @@ export class SimpleHosts {
                     changed = true;
                 }
             }
-            if (tokens.length < 2) {
+            if (changed && tokens.length < 2) {
                 lines.splice(i, 1);
             } else if (changed) {
                 lines[i] = tokens.join('\t');
